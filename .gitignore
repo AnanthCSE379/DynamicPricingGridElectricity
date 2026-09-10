@@ -1,0 +1,48 @@
+# Python cache and runtime
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+
+# Jupyter
+.ipynb_checkpoints
+*/.ipynb_checkpoints/*
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Full raw datasets and archives
+raw_data/
+*.zip
+*.7z
+*.tar.gz
+*.rar
+*.xlsx
+
+# Processed tabular datasets and training corpora
+*.csv
+*.parquet
+data/*.csv
+data/*.parquet
+data/*.jsonl
+
+# Base model weights and checkpoints
+models/
+*.safetensors
+adapters/*.safetensors
+checkpoints/*.pt
+
+# Logs and scratch
+*.log
+scratch/

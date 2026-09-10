@@ -1,0 +1,65 @@
+{
+  "VanillaRNN": {
+    "params": 15233,
+    "overall": {
+      "RMSE_kWh": 0.00893,
+      "MAE_kWh": 0.006537,
+      "MAPE_pct": 3.0598,
+      "R2": 0.987118
+    },
+    "high_tariff": {
+      "RMSE_kWh": 0.012982,
+      "MAE_kWh": 0.010145,
+      "MAPE_pct": 4.6375,
+      "R2": 0.976955
+    },
+    "normal_tariff": {
+      "RMSE_kWh": 0.008349,
+      "MAE_kWh": 0.006146,
+      "MAPE_pct": 2.9874,
+      "R2": 0.987975
+    }
+  },
+  "GRU": {
+    "params": 41473,
+    "overall": {
+      "RMSE_kWh": 0.008061,
+      "MAE_kWh": 0.006036,
+      "MAPE_pct": 2.9068,
+      "R2": 0.989502
+    },
+    "high_tariff": {
+      "RMSE_kWh": 0.011269,
+      "MAE_kWh": 0.008851,
+      "MAPE_pct": 3.6852,
+      "R2": 0.982636
+    },
+    "normal_tariff": {
+      "RMSE_kWh": 0.007714,
+      "MAE_kWh": 0.005778,
+      "MAPE_pct": 2.8726,
+      "R2": 0.989733
+    }
+  },
+  "LSTM": {
+    "params": 54593,
+    "overall": {
+      "RMSE_kWh": 0.010695,
+      "MAE_kWh": 0.008367,
+      "MAPE_pct": 4.4924,
+      "R2": 0.98152
+    },
+    "high_tariff": {
+      "RMSE_kWh": 0.016452,
+      "MAE_kWh": 0.01345,
+      "MAPE_pct": 6.313,
+      "R2": 0.962991
+    },
+    "normal_tariff": {
+      "RMSE_kWh": 0.010153,
+      "MAE_kWh": 0.008022,
+      "MAPE_pct": 4.4125,
+      "R2": 0.982216
+    }
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "dataset_name": "Low Carbon London (LCL) - ToU Smart Meter Cohort",
+  "total_raw_rows": 33783771,
+  "total_households": 1123,
+  "date_range": {
+    "start": "2011-11-23 09:00:00",
+    "end": "2014-02-28 00:00:00"
+  },
+  "halfhourly_grid_intervals": 39727,
+  "consumption_kwh_per_hh": {
+    "mean": 0.2043,
+    "median": 0.1954,
+    "std": 0.0808,
+    "min": 0.048,
+    "max": 0.5335
+  },
+  "tariff_events_2013": {
+    "normal_periods": 15072,
+    "high_periods": 788,
+    "low_periods": 1660
+  },
+  "demand_response_metrics": {
+    "overall_avg_kwh_normal": 0.1937,
+    "overall_avg_kwh_high": 0.2257,
+    "overall_avg_kwh_low": 0.2087,
+    "evening_peak_normal_kwh": 0.2733,
+    "evening_peak_high_kwh": 0.2883,
+    "evening_peak_demand_reduction_percent": -5.46
+  },
+  "execution_time_seconds": 0.96
+}

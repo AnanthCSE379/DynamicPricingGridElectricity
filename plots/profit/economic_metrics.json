@@ -1,0 +1,46 @@
+{
+  "Flat Tariff": {
+    "total_revenue_gbp": 217385.84,
+    "total_wholesale_gbp": 221325.48,
+    "total_congestion_gbp": 21680.85,
+    "total_net_profit_gbp": -25620.49,
+    "profit_margin_pct": -11.79,
+    "total_demand_kwh": 1527.66,
+    "avg_retail_tariff_p": 14.23,
+    "customer_effective_bill_p": 14.23,
+    "grid_stress_hours": 1096.0
+  },
+  "Static ToU": {
+    "total_revenue_gbp": 417831.12,
+    "total_wholesale_gbp": 215022.23,
+    "total_congestion_gbp": 18723.26,
+    "total_net_profit_gbp": 184085.62,
+    "profit_margin_pct": 44.06,
+    "total_demand_kwh": 1514.07,
+    "avg_retail_tariff_p": 24.37,
+    "customer_effective_bill_p": 27.6,
+    "grid_stress_hours": 1057.0
+  },
+  "Aggressive Peak": {
+    "total_revenue_gbp": 546629.25,
+    "total_wholesale_gbp": 211315.66,
+    "total_congestion_gbp": 12321.47,
+    "total_net_profit_gbp": 322992.12,
+    "profit_margin_pct": 59.09,
+    "total_demand_kwh": 1478.74,
+    "avg_retail_tariff_p": 30.63,
+    "customer_effective_bill_p": 36.97,
+    "grid_stress_hours": 851.5
+  },
+  "Our Model (FDTP)": {
+    "total_revenue_gbp": 406213.62,
+    "total_wholesale_gbp": 213859.47,
+    "total_congestion_gbp": 12848.02,
+    "total_net_profit_gbp": 179506.11,
+    "profit_margin_pct": 44.19,
+    "total_demand_kwh": 1501.37,
+    "avg_retail_tariff_p": 20.92,
+    "customer_effective_bill_p": 27.06,
+    "grid_stress_hours": 995.0
+  }
+}

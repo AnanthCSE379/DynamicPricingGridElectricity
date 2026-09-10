@@ -1,0 +1,23 @@
+{
+  "champion": "PureGRU",
+  "leaderboard": {
+    "PureVanillaRNN": {
+      "RMSE_kWh": 0.009029,
+      "MAE_kWh": 0.006939,
+      "MAPE_pct": 3.3894,
+      "R2": 0.98683
+    },
+    "PureGRU": {
+      "RMSE_kWh": 0.007578,
+      "MAE_kWh": 0.00561,
+      "MAPE_pct": 2.6779,
+      "R2": 0.990723
+    },
+    "PureLSTM": {
+      "RMSE_kWh": 0.010405,
+      "MAE_kWh": 0.007816,
+      "MAPE_pct": 3.934,
+      "R2": 0.982509
+    }
+  }
+}

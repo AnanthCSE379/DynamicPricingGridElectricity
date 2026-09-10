@@ -1,0 +1,27 @@
+{
+  "champion_pure_forecaster": "PureGRU",
+  "total_evaluated_halfhours": 7153,
+  "peak_shaving": {
+    "peak_threshold_kwh": 0.24,
+    "baseline_peak_mean_kwh": 0.30304,
+    "responsive_peak_mean_kwh": 0.28591,
+    "peak_shaved_kwh": 0.01712,
+    "peak_reduction_percent": 5.65,
+    "max_load_baseline_kwh": 0.40856,
+    "max_load_responsive_kwh": 0.38176
+  },
+  "grid_reliability": {
+    "par_baseline": 1.8974,
+    "par_responsive": 1.8188,
+    "par_improvement_percent": 4.14,
+    "grid_stress_hours_baseline": 1262.0,
+    "grid_stress_hours_responsive": 1230.0,
+    "stress_hours_eliminated": 32.0
+  },
+  "tariff_statistics": {
+    "mean_dynamic_price_p_kwh": 20.92,
+    "min_dynamic_price": 3.99,
+    "max_dynamic_price": 67.2,
+    "flat_tariff_benchmark": 14.23
+  }
+}
