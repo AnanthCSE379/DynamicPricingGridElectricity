@@ -6,12 +6,6 @@ This document details the mathematical formulation, architectural design, featur
 
 ---
 
-## 1. Mathematical Formulation of the Gated Recurrent Unit (GRU)
-
-The GRU cell (Cho et al., 2014) addresses vanishing gradients in standard recurrent networks through gating mechanisms that regulate information flow without a separate memory cell:
-
-For time step $t$, input vector $x_t \in \mathbb{R}^d$, and previous hidden state $h_{t-1} \in \mathbb{R}^h$:
-
 ## 1. Architectural Comparison: PureGRU vs. ConsumerTwin
 
 | Parameter | Model A: `PureGRU` (Forecaster) | Model B: `ConsumerTwin` (Digital Twin) |
