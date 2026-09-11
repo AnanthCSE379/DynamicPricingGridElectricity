@@ -6,36 +6,7 @@ This document details the mathematical formulation, architectural design, featur
 
 ---
 
-## 1. Mathematical Formulation of the Gated Recurrent Unit (GRU)
-
-The GRU cell (Cho et al., 2014) addresses vanishing gradients in standard recurrent networks through gating mechanisms that regulate information flow without a separate memory cell:
-
-For time step $t$, input vector $x_t \in \mathbb{R}^d$, and previous hidden state $h_{t-1} \in \mathbb{R}^h$:
-
-### 1. Update Gate ($z_t$)
-Controls how much of the past hidden state is brought into the current state:
-$$z_t = \sigma(W_z x_t + U_z h_{t-1} + b_z)$$
-
-### 2. Reset Gate ($r_t$)
-Determines how much of the past memory to forget:
-$$r_t = \sigma(W_r x_t + U_r h_{t-1} + b_r)$$
-
-### 3. Candidate Hidden State ($\tilde{h}_t$)
-Computes new candidate activation using the gated previous hidden state:
-$$\tilde{h}_t = \tanh(W_h x_t + U_h (r_t \odot h_{t-1}) + b_h)$$
-
-### 4. Final Hidden State ($h_t$)
-Linear interpolation between previous state and candidate state:
-$$h_t = (1 - z_t) \odot h_{t-1} + z_t \odot \tilde{h}_t$$
-
-*Where:*
-- $\sigma(\cdot)$ is the logistic sigmoid function $\sigma(v) = \frac{1}{1 + e^{-v}}$.
-- $\odot$ denotes the Hadamard (element-wise) product.
-- $W \in \mathbb{R}^{h \times d}$, $U \in \mathbb{R}^{h \times h}$, and $b \in \mathbb{R}^h$ are trainable weight tensors.
-
----
-
-## 2. Architectural Comparison: PureGRU vs. ConsumerTwin
+## 1. Architectural Comparison: PureGRU vs. ConsumerTwin
 
 | Parameter | Model A: `PureGRU` (Forecaster) | Model B: `ConsumerTwin` (Digital Twin) |
 | :--- | :--- | :--- |
@@ -50,7 +21,7 @@ $$h_t = (1 - z_t) \odot h_{t-1} + z_t \odot \tilde{h}_t$$
 
 ---
 
-## 3. Feature Engineering & Cyclical Encodings
+## 2. Feature Engineering & Cyclical Encodings
 
 Both networks receive half-hourly aggregate data from **1,000 UK households** over 39,727 intervals. To ensure continuity across temporal boundaries, calendar features are transformed into harmonic sine/cosine pairs:
 
@@ -67,7 +38,7 @@ Both networks receive half-hourly aggregate data from **1,000 UK households** ov
 
 ---
 
-## 4. Training Methodology & Anti-Leakage Protocol
+## 3. Training Methodology & Anti-Leakage Protocol
 
 ### Strict Chronological Partitioning
 To prevent lookahead bias and temporal leakage, data was split chronologically without shuffling:
@@ -86,7 +57,7 @@ To prevent lookahead bias and temporal leakage, data was split chronologically w
 
 ---
 
-## 5. Quantitative Generalization Performance
+## 4. Quantitative Generalization Performance
 
 Evaluated on the 7,201 held-out out-of-sample test half-hours:
 
