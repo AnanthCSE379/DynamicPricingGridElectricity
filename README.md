@@ -4,7 +4,7 @@ This repository provides an end-to-end framework for evaluating dynamic pricing,
 
 The system benchmarks multiple tariff control strategies—ranging from static baseline tariffs to autonomous fine-tuned Agentic AI controllers—to examine how pricing policies balance utility operating margins against substation transformer congestion.
 
-Detailed specifications covering data preprocessing, time series schemas, neural architectures, and regime definitions are documented in [DATA_AND_MODELS.md](DATA_AND_MODELS.md).
+Detailed specifications covering data preprocessing, time series schemas, neural architectures, and regime definitions are documented in [DATA_AND_MODELS.md](DATA_AND_MODELS.md). A comprehensive plot-by-plot theoretical and practical analysis is provided in [BENCHMARK_ANALYSIS.md](BENCHMARK_ANALYSIS.md).
 
 ---
 
@@ -34,6 +34,7 @@ The simulation environment consists of three interconnected subsystems:
 ```text
 ├── README.md                 # Project overview and instructions
 ├── DATA_AND_MODELS.md        # Data pipeline, time series schemas, and model specs
+├── BENCHMARK_ANALYSIS.md     # Detailed theoretical and practical plot analysis
 ├── requirements.txt          # Python runtime dependencies
 ├── .gitignore                # Excludes large raw data, model weights, and caches
 ├── benchmarks/
