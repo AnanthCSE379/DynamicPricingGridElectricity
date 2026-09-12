@@ -1,4 +1,4 @@
-# 🧠 Technical Specification: Dual-GRU Neural Architecture & Training Pipeline
+#  Technical Specification: Dual-GRU Neural Architecture & Training Pipeline
 
 This document details the mathematical formulation, architectural design, feature engineering, and training methodologies for the two specialized Gated Recurrent Unit (GRU) networks operating in the autonomous grid ecosystem:
 1. **Model A (`PureGRU`)**: Autonomous Feeder-Level Aggregate Load Forecaster (Zero Price Exposure).

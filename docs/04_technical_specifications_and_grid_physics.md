@@ -1,4 +1,4 @@
-# ⚡ Technical Specification: Grid Physics, Transformer Thermal Limits & Economic Formulation
+#  Technical Specification: Grid Physics, Transformer Thermal Limits & Economic Formulation
 
 This document details the first-principles electrical engineering derivations, regulatory standards, wholesale market equations, and financial accounting formulas governing the simulation environment.
 
@@ -41,13 +41,13 @@ The retail tariff boundaries are derived directly from the empirical contractual
 | **High Congestion Ceiling** | **$67.20\text{ p/kWh}$** | Statutory maximum price alert signaled to consumers during extreme substation stress events. |
 
 - **Source**: Schofield, J. et al., *"Low Carbon London Project - Dynamic Time of Use Tariff Trial Final Report"*, UKPN & Imperial College London (2014).
-- **Dataset File**: [`data/tariffs.parquet`](file:///Users/ananth/Documents/Research%20Papers/Solar%20Grids/Datasets/data/tariffs.parquet) (extracted from official trial records).
+- **Dataset File**: [`data/tariffs.parquet`](data/tariffs.parquet) (extracted from official trial records).
 
 ---
 
 ## 3. UK Wholesale Electricity Spot Price Formulation
 
-In [`src/grid_economics.py`](file:///Users/ananth/Documents/Research%20Papers/Solar%20Grids/Datasets/src/grid_economics.py), wholesale procurement costs reflect the half-hourly clearing dynamics of the **UK Day-Ahead Power Auction (N2EX / APX UK)**:
+In [`src/grid_economics.py`](src/grid_economics.py), wholesale procurement costs reflect the half-hourly clearing dynamics of the **UK Day-Ahead Power Auction (N2EX / APX UK)**:
 
 $$W(t) = \text{clip}\left(W_{\text{base}}(h) \times S_{\text{month}} + \epsilon_{\text{noise}}, \, 1.5, \, 80.0\right)$$
 

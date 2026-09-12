@@ -68,9 +68,9 @@ def plot_1_continuous_winter_timeline(data):
     # 1. Tariffs
     ax = axes[0]
     ax.plot(times, w2["regime1_static_lcl"]["tariffs"], color=COLORS["regime1_static_lcl"], label="1. Static Flat", alpha=0.7, linestyle=":")
-    ax.plot(times, w2["regime3_gru_dynamic_math"]["tariffs"], color=COLORS["regime3_gru_dynamic_math"], label="3. Math", alpha=0.7)
-    ax.plot(times, w2["regime4_gru_agent_hybrid"]["tariffs"], color=COLORS["regime4_gru_agent_hybrid"], label="4. Hybrid (Pre)", linewidth=2.2)
-    ax.plot(times, w2["regime6_hybrid_advance"]["tariffs"], color=COLORS["regime6_hybrid_advance"], label="6. Hybrid (Adv)", linewidth=2.2, linestyle="--")
+    ax.plot(times, w2["regime3_gru_dynamic_math"]["tariffs"], color=COLORS["regime3_gru_dynamic_math"], label="3. Twin GRU", alpha=0.7)
+    ax.plot(times, w2["regime4_gru_agent_hybrid"]["tariffs"], color=COLORS["regime4_gru_agent_hybrid"], label="4. GRU+Agent (Pre)", linewidth=2.2)
+    ax.plot(times, w2["regime6_hybrid_advance"]["tariffs"], color=COLORS["regime6_hybrid_advance"], label="6. GRU+Agent (Adv)", linewidth=2.2, linestyle="--")
     ax.axhline(25.0, color="red", linestyle="--", alpha=0.5, label="Price Shock Threshold (25p)")
     ax.set_ylabel("Tariff (p/kWh)")
     ax.set_title("Panel A: Dispatched Retail Tariffs over Continuous 14-Day Winter Peak", fontweight="bold")
@@ -125,10 +125,10 @@ def plot_2_seasonal_tariff_heatmap(data):
 
         hours = np.linspace(0, 23.5, 48)
         ax.plot(hours, diurnal_flat, color=COLORS["regime1_static_lcl"], linestyle=":", label="1. Static Flat")
-        ax.plot(hours, diurnal_math, color=COLORS["regime3_gru_dynamic_math"], label="3. Double GRU + Math")
-        ax.plot(hours, diurnal_hyb, color=COLORS["regime4_gru_agent_hybrid"], linewidth=2.5, label="4. Hybrid (Preemptive)")
+        ax.plot(hours, diurnal_math, color=COLORS["regime3_gru_dynamic_math"], label="3. Twin GRU")
+        ax.plot(hours, diurnal_hyb, color=COLORS["regime4_gru_agent_hybrid"], linewidth=2.5, label="4. GRU + Agent (Preemptive)")
         ax.plot(hours, diurnal_pure, color=COLORS["regime5_pure_agent"], linestyle="--", label="5. Pure Agent")
-        ax.plot(hours, diurnal_adv, color=COLORS["regime6_hybrid_advance"], linewidth=2.5, linestyle="--", label="6. Hybrid (Advance)")
+        ax.plot(hours, diurnal_adv, color=COLORS["regime6_hybrid_advance"], linewidth=2.5, linestyle="--", label="6. GRU + Agent (Advance)")
         ax.axhline(25.0, color="red", linestyle="--", alpha=0.4, label="Price Shock (25p)")
 
         ax.set_title(f"{s} Season Diurnal Tariff Profile", fontweight="bold")
@@ -151,7 +151,7 @@ def plot_3_seasonal_demand_and_stress(data):
 
     # Panel 1: Transformer Stress Hours by Season
     regime_keys = ["regime1_static_lcl", "regime2_gru_static_peak", "regime3_gru_dynamic_math", "regime4_gru_agent_hybrid", "regime5_pure_agent", "regime6_hybrid_advance"]
-    labels = ["1. Flat", "2. Peak", "3. Math", "4. Hybrid(Pre)", "5. Pure", "6. Hybrid(Adv)"]
+    labels = ["1. Flat", "2. Peak", "3. Twin GRU", "4. GRU+Agent(Pre)", "5. Pure Agent", "6. GRU+Agent(Adv)"]
     width = 0.14
     
     x = np.arange(len(SEASONS))
@@ -190,7 +190,7 @@ def plot_4_seasonal_financials(data):
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 6))
 
     regime_keys = ["regime1_static_lcl", "regime2_gru_static_peak", "regime3_gru_dynamic_math", "regime4_gru_agent_hybrid", "regime5_pure_agent", "regime6_hybrid_advance"]
-    labels = ["1. Flat", "2. Peak", "3. Math", "4. Hybrid(Pre)", "5. Pure", "6. Hybrid(Adv)"]
+    labels = ["1. Flat", "2. Peak", "3. Twin GRU", "4. GRU+Agent(Pre)", "5. Pure Agent", "6. GRU+Agent(Adv)"]
     x = np.arange(len(SEASONS))
     width = 0.14
 
@@ -228,7 +228,7 @@ def plot_5_seasonal_customer_bills(data):
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 6))
 
     regime_keys = ["regime1_static_lcl", "regime2_gru_static_peak", "regime3_gru_dynamic_math", "regime4_gru_agent_hybrid", "regime5_pure_agent", "regime6_hybrid_advance"]
-    labels = ["1. Flat", "2. Peak", "3. Math", "4. Hybrid(Pre)", "5. Pure", "6. Hybrid(Adv)"]
+    labels = ["1. Flat", "2. Peak", "3. Twin GRU", "4. GRU+Agent(Pre)", "5. Pure Agent", "6. GRU+Agent(Adv)"]
     x = np.arange(len(SEASONS))
     width = 0.14
 
@@ -281,10 +281,10 @@ def plot_6_seasonal_pareto_frontier(data):
     # Annotate key points
     ax.text(data["Winter"]["regime4_gru_agent_hybrid"]["customer_effective_rate_p_kwh"] + 0.1,
             data["Winter"]["regime4_gru_agent_hybrid"]["total_net_profit_gbp"] + 20,
-            "Winter: Preemptive (Protects Grid)", fontweight="bold", color=COLORS["regime4_gru_agent_hybrid"])
+            "Winter: GRU + Agent (Preemptive)", fontweight="bold", color=COLORS["regime4_gru_agent_hybrid"])
     ax.text(data["Winter"]["regime6_hybrid_advance"]["customer_effective_rate_p_kwh"] + 0.1,
             data["Winter"]["regime6_hybrid_advance"]["total_net_profit_gbp"] - 150,
-            "Winter: Advance (Maximizes Profit)", fontweight="bold", color=COLORS["regime6_hybrid_advance"])
+            "Winter: GRU + Agent (Advance)", fontweight="bold", color=COLORS["regime6_hybrid_advance"])
 
     ax.set_title("Cross-Seasonal Pareto Frontier: Operator Profit vs Customer Rate", fontweight="bold")
     ax.set_xlabel("Customer Effective Rate (p/kWh) — Lower is Better for Consumers")

@@ -11,9 +11,10 @@ Evaluates 5 Pricing Regimes across 4 Distinct Seasonal Weeks and a Continuous 2-
 Regimes Compared:
 1. Static Flat Tariff as per LCL (14.23 p/kWh)
 2. GRU Forecast + Static Peak Pricing (28.00 p/kWh threshold)
-3. Double GRU + Math Continuous Dynamic Pricing
-4. GRU Forecast + Fine-Tuned MLX Agent Hybrid
+3. Twin GRU Dynamic Pricing
+4. GRU + Fine-Tuned Agentic AI Controller (Preemptive)
 5. Pure Agentic (Agentic AI Forecast + Agentic AI Pricing)
+6. GRU + Fine-Tuned Agentic AI Controller (Advance Broadcast)
 """
 
 import os
@@ -141,12 +142,12 @@ def simulate_campaign(season_name, config, df_full, pure_model, pure_scaler, con
             "revenues": [], "wholesale_costs": [], "congestion_costs": []
         },
         "regime3_gru_dynamic_math": {
-            "label": "3. Double GRU + Math Dynamic",
+            "label": "3. Twin GRU",
             "tariffs": [], "demands": [], "forecasts": [], "wholesale": [], "profits": [],
             "revenues": [], "wholesale_costs": [], "congestion_costs": []
         },
         "regime4_gru_agent_hybrid": {
-            "label": "4. GRU + Agentic AI (Preemptive)",
+            "label": "4. GRU + Fine-Tuned Agentic AI Controller (Preemptive)",
             "tariffs": [], "demands": [], "forecasts": [], "wholesale": [], "profits": [],
             "revenues": [], "wholesale_costs": [], "congestion_costs": []
         },
@@ -156,7 +157,7 @@ def simulate_campaign(season_name, config, df_full, pure_model, pure_scaler, con
             "revenues": [], "wholesale_costs": [], "congestion_costs": []
         },
         "regime6_hybrid_advance": {
-            "label": "6. Hybrid Agent (Advance Broadcast)",
+            "label": "6. GRU + Fine-Tuned Agentic AI Controller (Advance)",
             "tariffs": [], "demands": [], "forecasts": [], "wholesale": [], "profits": [],
             "revenues": [], "wholesale_costs": [], "congestion_costs": []
         }
@@ -209,7 +210,7 @@ def simulate_campaign(season_name, config, df_full, pure_model, pure_scaler, con
         regimes["regime2_gru_static_peak"]["wholesale_costs"].append(e2["wholesale_cost_gbp"])
         regimes["regime2_gru_static_peak"]["congestion_costs"].append(e2["congestion_cost_gbp"])
 
-        # --- Regime 3: Double GRU + Math ---
+        # --- Regime 3: Twin GRU ---
         t3 = ctrl_math.compute_tariff(gru_fc)
         d3 = consumer_predict_one(consumer, p2_scaler, arr_p2, i, t3, device)
         e3 = compute_halfhour_economics(d3, t3, wh, N_HOUSEHOLDS)
@@ -222,7 +223,7 @@ def simulate_campaign(season_name, config, df_full, pure_model, pure_scaler, con
         regimes["regime3_gru_dynamic_math"]["wholesale_costs"].append(e3["wholesale_cost_gbp"])
         regimes["regime3_gru_dynamic_math"]["congestion_costs"].append(e3["congestion_cost_gbp"])
 
-        # --- Regime 4: Hybrid Agentic AI ---
+        # --- Regime 4: GRU + Fine-Tuned Agentic AI Controller ---
         t4, _ = agent_hybrid.compute_tariff(time_str, wh, gru_fc, history=history)
         d4 = consumer_predict_one(consumer, p2_scaler, arr_p2, i, t4, device)
         e4 = compute_halfhour_economics(d4, t4, wh, N_HOUSEHOLDS)
@@ -248,7 +249,7 @@ def simulate_campaign(season_name, config, df_full, pure_model, pure_scaler, con
         regimes["regime5_pure_agent"]["wholesale_costs"].append(e5["wholesale_cost_gbp"])
         regimes["regime5_pure_agent"]["congestion_costs"].append(e5["congestion_cost_gbp"])
 
-        # --- Regime 6: Hybrid Agentic AI (Advance Broadcast) ---
+        # --- Regime 6: GRU + Fine-Tuned Agentic AI (Advance Broadcast) ---
         d6 = consumer_predict_one(consumer, p2_scaler, arr_p2, i, next_t6, device)
         e6 = compute_halfhour_economics(d6, next_t6, wh, N_HOUSEHOLDS)
         regimes["regime6_hybrid_advance"]["tariffs"].append(next_t6)
@@ -259,13 +260,12 @@ def simulate_campaign(season_name, config, df_full, pure_model, pure_scaler, con
         regimes["regime6_hybrid_advance"]["revenues"].append(e6["revenue_gbp"])
         regimes["regime6_hybrid_advance"]["wholesale_costs"].append(e6["wholesale_cost_gbp"])
         regimes["regime6_hybrid_advance"]["congestion_costs"].append(e6["congestion_cost_gbp"])
-        # The Hybrid Agent already calculated the tariff (t4) based on the forecast. 
-        # We simply store it to be applied 1 step later for the Advance Broadcast regime.
+        # Store tariff to be applied 1 step later for the Advance Broadcast regime.
         next_t6 = t4
 
         if (i + 1) % 48 == 0 or i == n - 1:
             day_num = (i + 1) // 48
-            print(f"  Day {day_num:2d} ({i+1:3d}/{n} HH) | Net Profit so far: Flat=£{sum(regimes['regime1_static_lcl']['profits']):,.0f}, Math=£{sum(regimes['regime3_gru_dynamic_math']['profits']):,.0f}, Hyb=£{sum(regimes['regime4_gru_agent_hybrid']['profits']):,.0f}", flush=True)
+            print(f"  Day {day_num:2d} ({i+1:3d}/{n} HH) | Net Profit so far: Flat=£{sum(regimes['regime1_static_lcl']['profits']):,.0f}, TwinGRU=£{sum(regimes['regime3_gru_dynamic_math']['profits']):,.0f}, GRU_Agent=£{sum(regimes['regime4_gru_agent_hybrid']['profits']):,.0f}", flush=True)
 
     # Summarize this campaign
     campaign_summary = {}

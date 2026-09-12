@@ -100,15 +100,43 @@ Three recurrent architectures are implemented using standard hidden capacity for
 2. **Regime 2: Static Peak (Time-of-Use)**
    - Two-tier static tariff charging 28.00 p/kWh during evening peak hours (16:00–19:00) and 11.76 p/kWh during off-peak hours.
 
-3. **Regime 3: Dynamic Math Controller**
-   - Deterministic rule-based formula scaling tariff linearly with forecasted load between 3.99 p/kWh (valley) and 67.20 p/kWh (peak congestion).
+3. **Regime 3: Twin GRU Dynamic Controller**
+   - Classical dual-recurrent setup: a PureGRU neural network forecasts unconstrained feeder load, and a dynamic control policy scales retail prices between 3.99 p/kWh (valley) and 67.20 p/kWh (peak congestion).
 
-4. **Regime 4: Hybrid Agentic AI (Preemptive)**
+4. **Regime 4: GRU + Fine-Tuned Agentic AI Controller (Preemptive)**
    - The Agentic AI controller ingests high-precision neural forecasts from the PureGRU model.
-   - Dispatches price signals preemptively (t - 1) before the anticipated demand surge, acting as a grid shock absorber to relieve transformer stress.
+   - Dispatches price signals preemptively (t - 1) before the anticipated demand surge, acting as a physical grid shock absorber to relieve transformer stress.
 
 5. **Regime 5: Pure Agentic AI**
    - The Agentic AI controller infers trends directly from raw historical load observations without an external neural forecaster.
 
-6. **Regime 6: Hybrid Agentic AI (Advance Broadcast)**
-   - Uses the same tariff generated from the GRU forecast but formalizes an Hour-Ahead market broadcast where the price is announced one step in advance and enacted synchronously at step t.
+6. **Regime 6: GRU + Fine-Tuned Agentic AI Controller (Advance Broadcast)**
+   - Uses the tariff generated from the GRU forecast within a formalized Hour-Ahead market broadcast where the price is announced one step in advance and enacted synchronously at step t.
+
+---
+
+## 6. Plot Data Basis and Simulation Assumptions
+
+### A. Pure Empirical Data Plots (Zero Modeling Assumptions)
+The five Exploratory Data Analysis (EDA) visualizations in `plots/eda/` are calculated directly from raw smart meter telemetry (`lcl_tou.csv`) and official trial tariff tables (`Tariffs.xlsx`):
+- `01_diurnal_load_profile.png`: Arithmetic mean and standard deviation of actual half-hourly smart meter readings grouped by diurnal half-hour index.
+- `02_weekly_seasonal_patterns.png`: Direct calendar groupby of historical consumption by weekday and month.
+- `03_tariff_distribution_and_pricing.png`: Direct histogram and frequency counts of contractual trial rates.
+- `04_demand_response_high_vs_normal.png`: Direct empirical consumption comparison on days with declared High tariff alerts versus Normal baseline days.
+- `05_feeder_timeline_2year.png`: Continuous chronological trace of the raw 39,727 half-hourly observations over 2011–2014.
+
+In the benchmark suite (`plots/6way_benchmark/`), **Regime 1 (Static Flat)** represents the unmanaged empirical baseline demand under the historical standard 14.23 p/kWh London flat tariff.
+
+### B. Engineering Assumptions in the Benchmark Simulation Plots
+The remaining trajectories in `plots/6way_benchmark/` simulate dynamic pricing interactions under four documented engineering assumptions:
+1. **Substation Transformer Capacity**:
+   - The aggregate feeder serves a 1,000-household cluster.
+   - The substation transformer overload threshold is fixed at **0.25 kWh/hh per half-hour** (calibrated to the ~80th percentile of baseline feeder demand). Any aggregate demand above 0.25 kWh/hh constitutes equipment thermal overload.
+2. **Substation Congestion Penalty Function**:
+   - Modeled as a quadratic penalty function:
+     $$C_{\text{congestion}} = \gamma \times \left(\max(0, D_t - 0.25)\right)^2 \times 1,000\text{ homes}$$
+     where $\gamma = 2.0$ £ per $(\text{kWh/hh})^2$ per 1,000 homes, reflecting $I^2R$ resistive heating and DUoS red-band network congestion charges.
+3. **Wholesale Procurement Price Profile**:
+   - Modeled using a calibrated half-hourly diurnal profile (`WHOLESALE_HH_BASE`) matching the UK Day-Ahead Power Auction (N2EX / APX UK) for 2012–2014, with seasonal multipliers (Winter: 1.30–1.40x, Summer: 0.85–0.88x, Spring/Autumn: 0.95–1.20x) and Gaussian noise $\epsilon \sim \mathcal{N}(0, 0.05 \cdot W_{\text{base}})$.
+4. **Simulated Consumer Demand Response**:
+   - When dynamic tariffs are dispatched, the resulting customer demand is computed by the trained Consumer Twin GRU model (`consumer_predict_one()`), which captures real-world human demand inelasticity learned from the trial dataset.

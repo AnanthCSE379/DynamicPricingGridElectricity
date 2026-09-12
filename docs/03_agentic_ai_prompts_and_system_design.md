@@ -1,4 +1,4 @@
-# 💬 Technical Specification: Agentic AI Prompts, ChatML Templates & Autonomous System Design
+#  Technical Specification: Agentic AI Prompts, ChatML Templates & Autonomous System Design
 
 This document details the exact prompt engineering, conversational template structures, structured JSON parsing safeguards, and runtime control loops governing the **Autonomous Grid Operator Agent**.
 
@@ -71,7 +71,7 @@ The agent is constrained to return a single structured JSON object with three re
 
 ## 4. Autonomous Controller Architectures
 
-The agent operates in two distinct software deployment classes in [`src/mlx_agent.py`](file:///Users/ananth/Documents/Research%20Papers/Solar%20Grids/Datasets/src/mlx_agent.py):
+The agent operates in two distinct software deployment classes in [`src/mlx_agent.py`](src/mlx_agent.py):
 
 ### Class 1: `HybridMLXController` (Regime 4 — Champion Architecture)
 - **Mechanism**: Decouples physical forecasting from financial/policy optimization.

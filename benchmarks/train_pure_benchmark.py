@@ -227,7 +227,7 @@ def main():
 
     # Identify Champion
     champion_name = sorted_models[0][0]
-    print(f"\n🏆 CHAMPION PURE FORECASTER: {champion_name}")
+    print(f"\n CHAMPION PURE FORECASTER: {champion_name}")
     champion_ckpt = f"checkpoints/{champion_name}.pt"
     best_ckpt = "checkpoints/BestPureModel.pt"
     

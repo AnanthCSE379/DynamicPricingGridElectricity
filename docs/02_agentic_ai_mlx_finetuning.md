@@ -1,4 +1,4 @@
-# ⚡ Technical Specification: Agentic AI Fine-Tuning & Apple MLX LoRA Architecture
+#  Technical Specification: Agentic AI Fine-Tuning & Apple MLX LoRA Architecture
 
 This document details the machine learning architecture, dataset stratification engineering, and parameter-efficient fine-tuning (PEFT) methodology used to train the **Autonomous Grid Operator Agent** on Apple Silicon via Apple MLX.
 

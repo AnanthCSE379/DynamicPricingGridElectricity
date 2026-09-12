@@ -22,10 +22,10 @@ The simulation environment consists of three interconnected subsystems:
    Six pricing regimes are implemented for benchmark comparison:
    - **Static Flat**: Constant baseline rate (14.23 p/kWh).
    - **Static Peak (ToU)**: Two-tier Time-of-Use structure (28.00 p/kWh peak, 11.76 p/kWh off-peak).
-   - **Dynamic Math**: Continuous rule-based formula adjusting tariff proportionally to forecasted transformer loading.
+   - **Twin GRU**: Classical dual-GRU configuration (PureGRU forecaster paired with a dynamic controller scaling price with transformer loading).
    - **Pure Agentic AI**: Autonomous language model controller forecasting load trends and determining tariffs directly from historical consumption windows.
-   - **Hybrid Agentic AI (Preemptive)**: Agentic AI controller guided by a high-precision pure GRU forecast, dispatching price signals one step ahead (t - 1) to act as a physical grid shock absorber.
-   - **Hybrid Agentic AI (Advance Broadcast)**: Synchronized Hour-Ahead market configuration where the forecast-derived tariff is announced one interval in advance and enacted synchronously at step t.
+   - **GRU + Fine-Tuned Agentic AI Controller (Preemptive)**: Controller guided by a high-precision pure GRU forecast, dispatching price signals one step ahead (t - 1) to act as a physical grid shock absorber.
+   - **GRU + Fine-Tuned Agentic AI Controller (Advance Broadcast)**: Synchronized Hour-Ahead market configuration where the forecast-derived tariff is announced one interval in advance and enacted synchronously at step t.
 
 ---
 
@@ -46,15 +46,44 @@ The simulation environment consists of three interconnected subsystems:
 │   ├── pure_dataset.py       # Pure load forecasting dataset pipeline (no price)
 │   ├── models.py             # PyTorch recurrent architectures (RNN, LSTM, GRU)
 │   ├── mlx_agent.py          # Agentic AI controller classes
-│   ├── dynamic_pricing_controller.py # Rule-based math pricing controller
+│   ├── dynamic_pricing_controller.py # Rule-based dynamic pricing controller
 │   └── grid_economics.py     # Wholesale spot pricing and financial engine
 ├── scripts/
 │   ├── process_eda_pipeline.py # Out-of-core data extraction and aggregation
 │   ├── extract_tariffs.py    # Dynamic tariff parsing script
 │   └── run_mlx_train_overnight.py # LoRA training script for Agentic AI
 ├── checkpoints/              # Model scalers and configuration artifacts
+├── plots/eda/                # Exploratory plots generated purely from empirical data
 └── plots/6way_benchmark/     # High-resolution benchmark outputs and scorecards
 ```
+
+---
+
+## Plot Data Basis & Simulation Assumptions
+
+### Plots Based Purely on Empirical Data (Zero Simulation Assumptions)
+The five Exploratory Data Analysis (EDA) visualizations located in `plots/eda/` are derived directly from the raw Low Carbon London smart meter telemetry (`lcl_tou.csv`) and official trial schedules (`Tariffs.xlsx`), with zero neural networks, zero simulation models, and zero synthetic pricing assumptions:
+1. `01_diurnal_load_profile.png`: Direct arithmetic mean and standard deviation of actual half-hourly meter readings grouped by time of day.
+2. `02_weekly_seasonal_patterns.png`: Direct calendar groupby of real historical consumption across day-of-week and month.
+3. `03_tariff_distribution_and_pricing.png`: Direct frequency distribution of the contractual rates deployed during the trial.
+4. `04_demand_response_high_vs_normal.png`: Direct empirical comparison of actual meter consumption during declared High tariff alert days versus Normal days.
+5. `05_feeder_timeline_2year.png`: Continuous chronological trace of the raw 39,727 half-hourly observations over 2011–2014.
+
+In the benchmark suite (`plots/6way_benchmark/`), **Regime 1 (Static Flat)** represents the unmanaged empirical baseline demand under the historical standard 14.23 p/kWh London flat tariff.
+
+### Assumptions Made in the Benchmark Simulation Plots (`plots/6way_benchmark/`)
+The remaining benchmark curves evaluate closed-loop dynamic pricing interactions under four documented engineering assumptions:
+1. **Substation Transformer Capacity**:
+   - The aggregate feeder serves a 1,000-household cluster.
+   - The transformer overload threshold is fixed at **0.25 kWh/hh per half-hour** (calibrated to the ~80th percentile of baseline feeder demand). Any aggregate demand above 0.25 kWh/hh constitutes equipment thermal stress.
+2. **Substation Congestion Penalty**:
+   - Modeled as a quadratic penalty function:
+     $$C_{\text{congestion}} = 2.0 \times \left(\max(0, D_t - 0.25)\right)^2 \times 1,000\text{ homes}$$
+     reflecting physical $I^2R$ resistive heating and DUoS red-band network congestion charges.
+3. **Wholesale Procurement Price Profile**:
+   - Modeled using a half-hourly spot curve (`WHOLESALE_HH_BASE`) calibrated to the UK Day-Ahead Power Auction (N2EX / APX UK) for 2012–2014, with seasonal multipliers (Winter: 1.30–1.40x, Summer: 0.85–0.88x, Spring/Autumn: 0.95–1.20x).
+4. **Simulated Consumer Demand Response**:
+   - Customer demand under dynamic pricing is simulated via the trained Consumer Twin GRU (`consumer_predict_one()`), which predicts how households shift or curtail demand in response to incoming retail tariffs based on patterns learned from the trial dataset.
 
 ---
 
@@ -125,4 +154,4 @@ Output charts and evaluation metrics are saved to `plots/6way_benchmark/`.
 
 - **Consumer Demand Inelasticity**: Residential load response demonstrates a physical curtailment ceiling of approximately 5–6% during winter peak hours, even under punitive dynamic tariffs exceeding 60 p/kWh.
 - **Preemptive Signal Advantage**: Because residential consumption exhibits inertia, synchronized market signals (Advance Broadcast) arrive too late to prevent initial feeder overloads. Preemptive signaling (t - 1) enables earlier appliance deferral, reducing transformer overload duration.
-- **Controlled Operational Margin**: The Hybrid Agentic AI maintains operating margins within target boundaries (5–15%) without imposing severe price spikes on consumers.
+- **Controlled Operational Margin**: The GRU + Fine-Tuned Agentic AI Controller maintains operating margins within target boundaries (5–15%) without imposing severe price spikes on consumers.
