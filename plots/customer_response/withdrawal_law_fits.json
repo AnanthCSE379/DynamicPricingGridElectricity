@@ -1,0 +1,167 @@
+{
+  "definition": {
+    "baseline_price_p_per_kwh": 14.23,
+    "cost_spike": "x = p / 14.23 - 1",
+    "withdrawal_fraction": "W = 1 - q(p) / q(14.23)"
+  },
+  "contexts": {
+    "All held-out intervals": {
+      "n_intervals": 1200,
+      "baseline_demand_kwh_per_hh": 0.2125519961118698,
+      "prices_p_per_kwh": [
+        5.0,
+        10.0,
+        14.229999542236328,
+        20.0,
+        28.0,
+        40.0,
+        60.0,
+        80.0
+      ],
+      "withdrawal_fraction": [
+        -0.03824946,
+        -0.01601493,
+        0.0,
+        0.01592078,
+        0.02797901,
+        0.03564299,
+        0.04676032,
+        0.06218244
+      ],
+      "best_law": "power",
+      "fits": {
+        "logarithmic": {
+          "formula": "W(x) = A * ln(1 + x)",
+          "A": 0.03523183,
+          "rmse": 0.00317581
+        },
+        "power": {
+          "formula": "W(x) = A * x^B",
+          "A": 0.0265248,
+          "B": 0.53335679,
+          "rmse": 0.00181539
+        },
+        "saturating_exponential": {
+          "formula": "W(x) = W_max * (1 - exp(-K*x))",
+          "W_max": 0.06506803,
+          "K": 0.49105204,
+          "rmse": 0.00386531
+        }
+      }
+    },
+    "Winter evening (Dec\u2013Feb, 17:00\u201320:30)": {
+      "n_intervals": 110,
+      "baseline_demand_kwh_per_hh": 0.3462409973144531,
+      "prices_p_per_kwh": [
+        5.0,
+        10.0,
+        14.229999542236328,
+        20.0,
+        28.0,
+        40.0,
+        60.0,
+        80.0
+      ],
+      "withdrawal_fraction": [
+        -0.03809778,
+        -0.01749935,
+        0.0,
+        0.02023443,
+        0.03820167,
+        0.05064392,
+        0.06409409,
+        0.08064903
+      ],
+      "best_law": "power",
+      "fits": {
+        "logarithmic": {
+          "formula": "W(x) = A * ln(1 + x)",
+          "A": 0.04728996,
+          "rmse": 0.00387985
+        },
+        "power": {
+          "formula": "W(x) = A * x^B",
+          "A": 0.03541645,
+          "B": 0.54706775,
+          "rmse": 0.00231148
+        },
+        "saturating_exponential": {
+          "formula": "W(x) = W_max * (1 - exp(-K*x))",
+          "W_max": 0.08238783,
+          "K": 0.57068156,
+          "rmse": 0.00375642
+        }
+      }
+    },
+    "Winter overnight (Dec\u2013Feb, 00:00\u201305:30)": {
+      "n_intervals": 183,
+      "baseline_demand_kwh_per_hh": 0.13025300204753876,
+      "prices_p_per_kwh": [
+        5.0,
+        10.0,
+        14.229999542236328,
+        20.0,
+        28.0,
+        40.0,
+        60.0,
+        80.0
+      ],
+      "withdrawal_fraction": [
+        -0.02616446,
+        -0.00948916,
+        0.0,
+        0.00574274,
+        0.00430699,
+        -0.00373888,
+        -0.01061007,
+        -0.0083146
+      ],
+      "best_law": "not_monotonic",
+      "fits": {}
+    },
+    "Autumn evening (Oct\u2013Nov, 17:00\u201320:30)": {
+      "n_intervals": 69,
+      "baseline_demand_kwh_per_hh": 0.3151080012321472,
+      "prices_p_per_kwh": [
+        5.0,
+        10.0,
+        14.229999542236328,
+        20.0,
+        28.0,
+        40.0,
+        60.0,
+        80.0
+      ],
+      "withdrawal_fraction": [
+        -0.03944683,
+        -0.01740351,
+        0.0,
+        0.01906336,
+        0.03567033,
+        0.04827873,
+        0.06397169,
+        0.08241623
+      ],
+      "best_law": "power",
+      "fits": {
+        "logarithmic": {
+          "formula": "W(x) = A * ln(1 + x)",
+          "A": 0.04703882,
+          "rmse": 0.00280564
+        },
+        "power": {
+          "formula": "W(x) = A * x^B",
+          "A": 0.03376297,
+          "B": 0.58219818,
+          "rmse": 0.00172228
+        },
+        "saturating_exponential": {
+          "formula": "W(x) = W_max * (1 - exp(-K*x))",
+          "W_max": 0.0891321,
+          "K": 0.46304281,
+          "rmse": 0.00378892
+        }
+      }
+    }
+  }
+}

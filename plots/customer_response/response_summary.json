@@ -1,0 +1,193 @@
+{
+  "model": "GRUModel / ConsumerTwin checkpoint GRU.pt",
+  "test_period": "2013-10-01 through 2014-02-28",
+  "n_sampled_held_out_windows": 1200,
+  "lookback_half_hours": 48,
+  "deployment_intervention": "Replace tariff_price in final input row (lag 0.5 h before prediction).",
+  "price_sweep": {
+    "All held-out intervals": {
+      "n_intervals": 1200,
+      "prices_p_per_kwh": [
+        5.0,
+        10.0,
+        14.229999542236328,
+        20.0,
+        28.0,
+        40.0,
+        60.0,
+        80.0
+      ],
+      "mean_demand_kwh_per_hh": [
+        0.22068199515342712,
+        0.21595600247383118,
+        0.2125519961118698,
+        0.20916800200939178,
+        0.20660500228405,
+        0.20497600734233856,
+        0.2026129961013794,
+        0.1993349939584732
+      ],
+      "demand_at_14_23p_kwh_per_hh": 0.212552,
+      "local_slope_kwh_per_hh_per_p": -0.00072074,
+      "local_price_elasticity": -0.048253,
+      "quadratic_surrogate": {
+        "intercept": 0.21369275,
+        "linear": -0.00048977,
+        "quadratic": 4.3954e-06,
+        "formula": "q(p) = intercept + linear*(p-14.23) + quadratic*(p-14.23)^2"
+      }
+    },
+    "Winter evening (Dec\u2013Feb, 17:00\u201320:30)": {
+      "n_intervals": 110,
+      "prices_p_per_kwh": [
+        5.0,
+        10.0,
+        14.229999542236328,
+        20.0,
+        28.0,
+        40.0,
+        60.0,
+        80.0
+      ],
+      "mean_demand_kwh_per_hh": [
+        0.35943201184272766,
+        0.3522999882698059,
+        0.3462409973144531,
+        0.33923500776290894,
+        0.33301401138305664,
+        0.3287059962749481,
+        0.3240489959716797,
+        0.3183169960975647
+      ],
+      "demand_at_14_23p_kwh_per_hh": 0.346241,
+      "local_slope_kwh_per_hh_per_p": -0.00134843,
+      "local_price_elasticity": -0.055419,
+      "quadratic_surrogate": {
+        "intercept": 0.34724192,
+        "linear": -0.00098497,
+        "quadratic": 8.7163e-06,
+        "formula": "q(p) = intercept + linear*(p-14.23) + quadratic*(p-14.23)^2"
+      }
+    },
+    "Winter overnight (Dec\u2013Feb, 00:00\u201305:30)": {
+      "n_intervals": 183,
+      "prices_p_per_kwh": [
+        5.0,
+        10.0,
+        14.229999542236328,
+        20.0,
+        28.0,
+        40.0,
+        60.0,
+        80.0
+      ],
+      "mean_demand_kwh_per_hh": [
+        0.13366100192070007,
+        0.13148899376392365,
+        0.13025300204753876,
+        0.12950499355793,
+        0.12969200313091278,
+        0.1307400017976761,
+        0.13163499534130096,
+        0.1313360035419464
+      ],
+      "demand_at_14_23p_kwh_per_hh": 0.130253,
+      "local_slope_kwh_per_hh_per_p": -0.00022964,
+      "local_price_elasticity": -0.025088,
+      "quadratic_surrogate": {
+        "intercept": 0.13118333,
+        "linear": -8.554e-05,
+        "quadratic": 1.4992e-06,
+        "formula": "q(p) = intercept + linear*(p-14.23) + quadratic*(p-14.23)^2"
+      }
+    },
+    "Autumn evening (Oct\u2013Nov, 17:00\u201320:30)": {
+      "n_intervals": 69,
+      "prices_p_per_kwh": [
+        5.0,
+        10.0,
+        14.229999542236328,
+        20.0,
+        28.0,
+        40.0,
+        60.0,
+        80.0
+      ],
+      "mean_demand_kwh_per_hh": [
+        0.32753801345825195,
+        0.3205919861793518,
+        0.3151080012321472,
+        0.3091009855270386,
+        0.30386799573898315,
+        0.2998949885368347,
+        0.294950008392334,
+        0.28913798928260803
+      ],
+      "demand_at_14_23p_kwh_per_hh": 0.315108,
+      "local_slope_kwh_per_hh_per_p": -0.0011982,
+      "local_price_elasticity": -0.05411,
+      "quadratic_surrogate": {
+        "intercept": 0.31634961,
+        "linear": -0.00087255,
+        "quadratic": 7.3556e-06,
+        "formula": "q(p) = intercept + linear*(p-14.23) + quadratic*(p-14.23)^2"
+      }
+    }
+  },
+  "lag_test": {
+    "context": "Winter evening (Dec\u2013Feb, 17:00\u201320:30)",
+    "baseline_price_p_per_kwh": 14.23,
+    "intervention_price_p_per_kwh": 60.0,
+    "effect_kwh_per_hh_by_oldest_to_newest_lag": [
+      0.0011404,
+      -0.0002173,
+      2.71e-05,
+      0.0001094,
+      0.0001253,
+      0.0001458,
+      0.0001617,
+      0.0001667,
+      0.0001533,
+      0.0001277,
+      9.57e-05,
+      5.8e-05,
+      1.95e-05,
+      -1.1e-06,
+      -2.5e-06,
+      2.47e-05,
+      6.45e-05,
+      0.000117,
+      0.0001795,
+      0.0002533,
+      0.0003308,
+      0.0003949,
+      0.0004158,
+      0.000371,
+      0.0002686,
+      0.0001234,
+      -3.59e-05,
+      -0.0001827,
+      -0.0002888,
+      -0.0003152,
+      -0.0002311,
+      -9.42e-05,
+      1.8e-05,
+      0.0001106,
+      0.0001446,
+      0.0001081,
+      2.69e-05,
+      -0.0001131,
+      -0.0003441,
+      -0.0005606,
+      -0.0005705,
+      -0.0005946,
+      -0.0003972,
+      0.0011234,
+      -0.0016587,
+      0.0012992,
+      0.0056732,
+      -0.0244428
+    ],
+    "newest_lag_index": 47
+  }
+}
