@@ -11,7 +11,6 @@ import pandas as pd
 import torch
 
 from norway_energy_crisis.clean_data import (
-    ROOT,
     START,
     END,
     REGIONS,
@@ -34,7 +33,7 @@ def fixture(root):
     """Build a small full-calendar panel covering real partition and DST boundaries.
 
     Use three households, a negative price, a true zero, unknown survey data and
-    cached synthetic weather. Tests need no network access or trained checkpoints.
+    cached synthetic weather. Tests need no downloads, network or checkpoints.
     """
     raw = root / "raw"
     raw.mkdir()
@@ -49,7 +48,22 @@ def fixture(root):
         )
     )
     households.to_csv(raw / "households.csv", index=False)
-    survey = pd.read_csv(ROOT / "survey.csv")
+    # Include only this fixture's survey definitions, independent of raw downloads.
+    options = {
+        "Q22": {1: "Detached house"},
+        "Q23": {1: "Under 30 sqm"},
+        "Q28": {1: "Electric water heater"},
+        "Q29": {1: "Yes", 2: "No"},
+        "Q32": {1: "Spot price/hourly spot", 2: "Variable price", 3: "Fixed price"},
+        **{f"Q27_{index}": {0: "False", 1: "True"} for index in range(1, 11)},
+    }
+    survey = pd.DataFrame(
+        [
+            dict(Question_ID=question, Option_number=code, Option_translation=label)
+            for question, labels in options.items()
+            for code, label in labels.items()
+        ]
+    )
     survey.to_csv(raw / "survey.csv", index=False)
     answers = pd.DataFrame({"ID": households.ID, "Q32": [1, 1, 3]})
     for question in STATIC:
@@ -159,6 +173,8 @@ class PipelineTests(unittest.TestCase):
         self.assertAlmostEqual(float(self.data.prices[0, 0]), -0.01972, places=6)
         self.assertEqual(float(np.load(self.cleaned / "demand.npy")[0, 0]), 0)
         self.assertEqual(self.data.preprocessor.ids, [101, 102])
+        self.assertEqual(audit["category_labels"]["Q22"]["1"], "Detached house")
+        self.assertEqual(audit["category_labels"]["Q27_1"]["0"], "False")
         with self.assertRaises(ValueError):
             timestamps(pd.DataFrame({"Date": ["2021-01-01"], "Hour": [0]}))
         households = pd.read_csv(self.raw / "households.csv")

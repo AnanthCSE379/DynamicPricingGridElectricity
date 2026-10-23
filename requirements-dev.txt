@@ -1,0 +1,5 @@
+-r requirements.txt
+
+# Keep local formatting and CI consistent.
+black==25.9.0
+ruff==0.12.0
