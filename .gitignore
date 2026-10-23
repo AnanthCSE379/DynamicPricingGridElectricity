@@ -47,5 +47,20 @@ checkpoints/*.pt
 *.log
 scratch/
 
-# Outputs of the new response/selector workflow
-results/demand_response/
+# Local research archives and retired experiment outputs
+/local_archive/
+/results/
+/plots/
+
+# Model checkpoints, replay snapshots and prepared numeric arrays
+*.pt
+*.pth
+*.ckpt
+*.onnx
+*.npy
+*.npz
+*.pkl
+*.pickle
+
+# Downloaded reference papers
+/norway_energy_crisis/*.pdf

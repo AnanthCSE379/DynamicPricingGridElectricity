@@ -1,0 +1,6 @@
+cleaned/
+prepared/
+weather_cache/
+runs/
+*.log
+__pycache__/
