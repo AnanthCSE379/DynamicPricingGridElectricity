@@ -1,5 +1,7 @@
 # Household demand response and tariff selection
 
+[![Code checks](https://github.com/AnanthCSE379/DynamicPricingGridElectricity/actions/workflows/ci.yaml/badge.svg)](https://github.com/AnanthCSE379/DynamicPricingGridElectricity/actions/workflows/ci.yaml)
+
 The active implementation uses the Norwegian energy-crisis dataset.
 
 - [Data and response models](norway_energy_crisis/README.md): validated hourly data, training-only preprocessing, and RNN/GRU/LSTM/Transformer comparisons for 717 spot-contract households. The selected 24-hour Transformer achieved mean test RMSE of 0.83645 kWh.
