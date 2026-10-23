@@ -256,6 +256,43 @@ class PipelineTests(unittest.TestCase):
             [0, 1],
         )
 
+    def test_weather_timestamp_resolutions_and_real_gaps(self):
+        """Distinguish timestamp-unit changes from genuinely missing hours."""
+        local_hours = pd.date_range("2021-01-01 01:00", periods=3, freq="h")
+        utc_hours = pd.date_range("2021-01-01", periods=3, freq="h", tz="UTC")
+        for unit in ("s", "ms", "us", "ns"):
+            with self.subTest(unit=unit):
+                payload = {
+                    "hourly": {
+                        "time": utc_hours.as_unit(unit),
+                        "temperature_2m": [1.0, 2.0, 3.0],
+                    }
+                }
+                values, adjustments = normalize_weather(
+                    payload, local_hours.as_unit(unit)
+                )
+                np.testing.assert_array_equal(values, [1.0, 2.0, 3.0])
+                self.assertEqual(adjustments["spring_hours_interpolated"], [])
+                self.assertEqual(adjustments["autumn_second_hours_omitted"], [])
+                payload["hourly"]["time"] = utc_hours[[0, 2]].as_unit(unit)
+                payload["hourly"]["temperature_2m"] = [1.0, 3.0]
+                with self.assertRaisesRegex(ValueError, "Weather UTC series has gaps"):
+                    normalize_weather(payload, local_hours)
+
+    def test_saved_timestamps_are_nanoseconds(self):
+        """Prepared timestamps must keep their units across pandas releases."""
+        times = np.load(self.cleaned / "times.npy")
+        self.assertEqual(times.dtype, np.dtype("int64"))
+        expected = np.datetime64(START, "ns").astype(np.int64)
+        self.assertEqual(int(times[0]), int(expected))
+        np.testing.assert_array_equal(
+            np.diff(times), np.full(len(times) - 1, 3600 * 10**9)
+        )
+        np.testing.assert_array_equal(self.data.times, times)
+        np.testing.assert_array_equal(
+            calendar(times[:24]), calendar(times[:24].astype("datetime64[ns]"))
+        )
+
     def test_architectures_gradients_checkpoint_and_inference(self):
         batch = self.data.batch(
             np.array([0, 1]), np.repeat(self.data.origins["train"][0], 2), 24

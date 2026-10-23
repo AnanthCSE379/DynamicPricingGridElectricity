@@ -284,7 +284,7 @@ def price_support(data):
     """Count training hours within 0.05 NOK/kWh of actions by region and quarter."""
     grid = price_grid(3.0)
     train = data.partitions == 0
-    dates = pd.DatetimeIndex(pd.to_datetime(data.times))
+    dates = pd.DatetimeIndex(pd.to_datetime(data.times, unit="ns"))
     quarter = (dates.month.to_numpy() - 1) // 3 + 1
     result = dict(
         grid=grid.tolist(),

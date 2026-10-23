@@ -85,8 +85,11 @@ def normalize_weather(payload, index):
         and np.isfinite(values).all(),
         "Weather must have unique UTC hours and finite temperatures.",
     )
+    # Parsed timestamps may use seconds, microseconds or nanoseconds across pandas
+    # versions. Compare elapsed time instead of assuming a unit for integer values.
     require(
-        np.all(np.diff(utc_hours.asi8) == 3600 * 10**9), "Weather UTC series has gaps."
+        np.all(utc_hours[1:] - utc_hours[:-1] == pd.Timedelta(hours=1)),
+        "Weather UTC series has gaps.",
     )
     local_hours = utc_hours.tz_convert("Europe/Oslo").tz_localize(None)
     temperature_series = pd.Series(values, index=local_hours)
@@ -341,7 +344,8 @@ def clean(raw=ROOT, output=ROOT / "cleaned", cache=ROOT / "weather_cache"):
         demand=demand_panel,
         prices=np.asarray(price_grid, dtype=np.float64),
         temperature=np.asarray(temperatures),
-        times=hourly_index.asi8,
+        # Saved timestamps are always nanoseconds, regardless of pandas defaults.
+        times=hourly_index.as_unit("ns").asi8,
         household_ids=household_ids,
         area_index=np.array(
             [areas.index(path) for path in metered.Price_area], dtype=np.int8

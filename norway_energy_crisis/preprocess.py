@@ -40,14 +40,21 @@ def calendar(values):
     """
     values = np.asarray(values)
     shape = values.shape
-    timestamps = pd.DatetimeIndex(pd.to_datetime(values.ravel()))
+    # Integer arrays follow the saved nanosecond contract; datetime/string inputs
+    # retain their declared units and calendar interpretation.
+    timestamp_values = values.ravel()
+    timestamps = pd.DatetimeIndex(
+        pd.to_datetime(timestamp_values, unit="ns")
+        if np.issubdtype(values.dtype, np.integer)
+        else pd.to_datetime(timestamp_values)
+    )
     require(not timestamps.hasnans, "Invalid calendar timestamp.")
     hour_phase = 2 * np.pi * timestamps.hour.to_numpy() / 24
-    weekday_phase = 2 * np.pi * timestamps.dayofweek.to_numpy() / 7
+    weekday_phase = 2 * np.pi * timestamps.day_of_week.to_numpy() / 7
     year_phase = (
         2
         * np.pi
-        * (timestamps.dayofyear.to_numpy() - 1 + timestamps.hour.to_numpy() / 24)
+        * (timestamps.day_of_year.to_numpy() - 1 + timestamps.hour.to_numpy() / 24)
         / np.where(timestamps.is_leap_year, 366, 365)
     )
     return (
@@ -284,7 +291,7 @@ def preprocess(cleaned=ROOT / "cleaned", output=ROOT / "prepared"):
     prices = np.load(cleaned / "prices.npy")
     temperature = np.load(cleaned / "temperature.npy")
     times = np.load(cleaned / "times.npy")
-    dates = pd.DatetimeIndex(times)
+    dates = pd.DatetimeIndex(pd.to_datetime(times, unit="ns"))
     partitions = np.full(len(times), 255, dtype=np.uint8)
     for split_id, (_, (start, end)) in enumerate(SPLITS.items()):
         partitions[(dates >= start) & (dates < end)] = split_id

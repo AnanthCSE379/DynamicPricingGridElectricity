@@ -14,9 +14,13 @@ concurrency:
 
 jobs:
   check:
-    name: Python checks and CPU regression tests
+    name: CPU checks (${{ matrix.pandas }})
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        pandas: ["pandas>=2.2,<3", "pandas>=3,<4"]
     env:
       MPLBACKEND: Agg
       OMP_NUM_THREADS: "4"
@@ -41,6 +45,7 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install 'torch>=2.2' --index-url https://download.pytorch.org/whl/cpu
           make install-dev PYTHON=python
+          python -m pip install '${{ matrix.pandas }}'
 
       # Tests generate their own data, weather and checkpoints. No private files
       # or long-running research training are needed on the hosted CPU runner.

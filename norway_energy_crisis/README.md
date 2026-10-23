@@ -35,4 +35,4 @@ Saved checkpoints remain usable after the code cleanup. Training also fingerprin
 
 The comparison writes `runs/comparison_v1/status.json`, per-run histories and metrics, frozen model selection, and a final `REPORT.md`. The report recommends later simulator use only if the held-out 24-hour comparison passes both baseline and price-free checks.
 
-Verification: `python -m unittest norway_energy_crisis.test_pipeline -v`. Eight tests cover the full workflow and exact checkpoint recovery after interruption. Completed data findings and the current experiment stage are summarized in `REPORT.md`.
+Verification: `python -m unittest norway_energy_crisis.test_pipeline -v`. Ten tests cover the full workflow, timestamp-unit compatibility and exact checkpoint recovery after interruption. Completed data findings and the current experiment stage are summarized in `REPORT.md`.

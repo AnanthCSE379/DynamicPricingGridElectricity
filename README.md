@@ -21,6 +21,6 @@ make check
 make train-dqn-awake BUDGET_HOURS=10
 ```
 
-`make check` runs formatting checks, linting and tests. Tests generate temporary data, weather and checkpoints without the ignored downloads. [GitHub Actions](.github/workflows/ci.yaml) runs the same checks on pushes, pull requests and manual dispatches using Python 3.13 on a CPU runner. Full training and MPS checks use local data and hardware.
+`make check` runs formatting checks, linting and tests. Tests generate temporary data, weather and checkpoints without the ignored downloads. [GitHub Actions](.github/workflows/ci.yaml) runs the same checks on pushes, pull requests and manual dispatches using Python 3.13 with both pandas 2 and pandas 3 on CPU runners. Full training and MPS checks use local data and hardware.
 
 `make prepare` performs initial cleaning and preprocessing; existing output directories are protected. The training targets use fresh `comparison_v2` and `dqn_v2` output folders by default and resume from them when inputs and source match. DQN uses the completed `comparison_v1` response checkpoints unless `RESPONSE_ROOT` is overridden. Evaluation defaults to the completed `dqn_v1` experiment. Override paths or the interpreter as needed, for example `make check PYTHON=python` or `make train-dqn RESPONSE_ROOT=norway_energy_crisis/runs/comparison_v2 DQN_OUTPUT=norway_energy_crisis/runs/dqn_v3`.
