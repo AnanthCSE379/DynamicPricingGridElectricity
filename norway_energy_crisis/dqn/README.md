@@ -11,12 +11,14 @@ Both the response ensemble and SB3 DQN run on MPS. Replay stays in CPU memory. L
 From the parent project directory:
 
 ```sh
-caffeinate -d -i -s -m /Users/ananth/anaconda3/bin/python -u -m norway_energy_crisis.dqn.train --budget-hours 10 --device mps
+caffeinate -d -i -s -m /Users/ananth/anaconda3/bin/python -u -m norway_energy_crisis.dqn.train --budget-hours 10 --device mps --output norway_energy_crisis/runs/dqn_v2
 ```
 
 Training runs six sequential 100-minute slots: caps 2 and 3 for seeds 42, 7 and 2026. Periodic validation and saving count toward each slot; measured validation time is reserved for its final evaluation. Setup and final testing add time outside the ten-hour training phase. Keep the laptop open and connected to power.
 
 The default output is `norway_energy_crisis/runs/dqn_v1/`. `status.json` shows the stage; each active fit's `progress.json` records decisions, updates, reward, learning rate and budget. Diagnostics contain price support, response curves, constant-price outcomes and validation baselines. The final `REPORT.md`, `comparison.json`, `test_metrics.json` and plots are written after all fits and held-out evaluations finish.
+
+The command above uses a fresh output folder to preserve the completed experiment. Source fingerprints intentionally prevent resuming training after code changes. Existing policies and response checkpoints remain loadable for evaluation; `--response-root` selects the response comparison folder when needed.
 
 After interruption, run the identical command. One local `resume.pkl` stores the active model, optimizer, replay, environment, CPU/MPS random states and consumed budget. Inputs/settings are fingerprinted. Completed fits keep only their best policy; checkpoint recovery preserves state without promising bitwise-identical MPS training.
 

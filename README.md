@@ -10,3 +10,5 @@ Raw downloads, reference papers, cleaned/prepared data, weather caches and model
 The retired LCL scripts, checkpoints and generated outputs were removed. Essential LCL reports, metrics and source fingerprints remain in the ignored `local_archive/lcl/` folder (about 100 KB). Original downloads remain in the ignored `raw_data/` folder.
 
 Install dependencies from `requirements.txt`. Dataset preparation, training, evaluation and test commands are documented in the linked pipeline guides. Forecasting and simulated pricing results do not establish causal customer response.
+
+Run the complete regression suite with `python -m unittest norway_energy_crisis.test_pipeline norway_energy_crisis.dqn.test_dqn -v`. The MPS test runs when the GPU is available. New training after source changes requires a fresh output folder; saved checkpoints remain compatible for inference and evaluation.
