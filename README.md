@@ -1,5 +1,7 @@
 # Norwegian electricity pricing research
 
+[![Code checks](https://github.com/AnanthCSE379/DynamicPricingGridElectricity/actions/workflows/ci.yaml/badge.svg)](https://github.com/AnanthCSE379/DynamicPricingGridElectricity/actions/workflows/ci.yaml)
+
 The project models household consumption and learns hourly electricity prices
 using the Norwegian energy-crisis dataset.
 
