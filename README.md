@@ -1,28 +1,75 @@
-# Household demand response and tariff selection
+# Norwegian electricity pricing research
 
-[![Code checks](https://github.com/AnanthCSE379/DynamicPricingGridElectricity/actions/workflows/ci.yaml/badge.svg)](https://github.com/AnanthCSE379/DynamicPricingGridElectricity/actions/workflows/ci.yaml)
+The project models household consumption and learns hourly electricity prices
+using the Norwegian energy-crisis dataset.
 
-The active implementation uses the Norwegian energy-crisis dataset.
+- Validated hourly readings for 1,136 households; 717 spot-contract households
+  form the pricing cohort.
+- A frozen Transformer predicts household consumption from consumption/price
+  history, calendar, temperature and household descriptors.
+- The current DQN experiment uses 48-hour episodes and compares training on the
+  original and upgraded consumer models across three seeds.
+- Its reward combines regional grid stress, household energy deviation and
+  modeled spot-energy charges. Grid weights rise with preceding demand.
+- A Streamlit dashboard shows training rewards, price actions, reward components
+  and individual household trajectories, including partially recorded episodes.
 
-- [Data and response models](norway_energy_crisis/README.md): validated hourly data, training-only preprocessing, and RNN/GRU/LSTM/Transformer comparisons for 717 spot-contract households. The selected 24-hour Transformer achieved mean test RMSE of 0.83645 kWh.
-- [Hourly DQN experiment](norway_energy_crisis/dqn/README.md): completed six MPS training runs comparing 2.00 and 3.00 NOK/kWh price caps. Validation selected the 2.00 cap. DQN did not outperform the stronger market-tracking and greedy baselines under the agreed four-term objective.
+Pricing currently models consumption without allocation or forced consumption
+floors. Earlier allocation experiments remain available for further research.
+All counterfactual price responses are model predictions; they do not establish
+causal consumer response or actual electrical-grid stability.
 
-Raw downloads, reference papers, cleaned/prepared data, weather caches and model runs stay local and are excluded from Git. Existing local checkpoints are required to evaluate the trained policies; cloning the source alone does not include them.
+## Organisation
 
-The retired LCL scripts, checkpoints and generated outputs were removed. Essential LCL reports, metrics and source fingerprints remain in the ignored `local_archive/lcl/` folder (about 100 KB). Original downloads remain in the ignored `raw_data/` folder.
+| Location | Purpose |
+| --- | --- |
+| [Data pipeline](norway_energy_crisis/README.md) | Cleaning, preprocessing and original consumer models |
+| [response_v2/](norway_energy_crisis/response_v2/README.md) | Upgraded consumer models and sequence evaluation |
+| [pricing_v2/](norway_energy_crisis/pricing_v2/README.md) | Current 48-hour DQN comparison and shared reward accounting |
+| [inspection/](norway_energy_crisis/inspection/README.md) | Training and household dashboard |
+| [analysis/](norway_energy_crisis/analysis/README.md) | Dataset audits and consumer-behaviour investigations |
+| [capacity/](norway_energy_crisis/capacity/README.md) | Earlier regional allocation experiments |
+| [dqn/](norway_energy_crisis/dqn/README.md) | Earlier pricing study and shared simulation/training utilities |
+| [make/legacy.mk](make/legacy.mk) | Commands for earlier studies and diagnostics |
 
-Install dependencies from `requirements.txt`. Dataset preparation, training, evaluation and test commands are documented in the linked pipeline guides. Forecasting and simulated pricing results do not establish causal customer response.
+The shared utilities retain their original module paths so frozen experiment
+fingerprints and checkpoint loading remain valid.
 
-Run the complete regression suite with `python -m unittest norway_energy_crisis.test_pipeline norway_energy_crisis.dqn.test_dqn -v`. The MPS test runs when the GPU is available. New training after source changes requires a fresh output folder; saved checkpoints remain compatible for inference and evaluation.
+## Commands
 
-The [Makefile](Makefile) lists commands with `make help`. Use an activated Python environment, then:
+Run from this directory using the intended Python environment:
 
 ```sh
-make install-dev
-make check
-make train-dqn-awake BUDGET_HOURS=10
+make install-dev PYTHON=python
+make check PYTHON=python
+make install-dashboard PYTHON=python
+make dashboard PYTHON=python
+make pricing-status PYTHON=python
 ```
 
-`make check` runs formatting checks, linting and tests. Tests generate temporary data, weather and checkpoints without the ignored downloads. [GitHub Actions](.github/workflows/ci.yaml) runs the same checks on pushes, pull requests and manual dispatches using Python 3.13 with both pandas 2 and pandas 3 on CPU runners. Full training and MPS checks use local data and hardware.
+For the bounded pricing experiment:
 
-`make prepare` performs initial cleaning and preprocessing; existing output directories are protected. The training targets use fresh `comparison_v2` and `dqn_v2` output folders by default and resume from them when inputs and source match. DQN uses the completed `comparison_v1` response checkpoints unless `RESPONSE_ROOT` is overridden. Evaluation defaults to the completed `dqn_v1` experiment. Override paths or the interpreter as needed, for example `make check PYTHON=python` or `make train-dqn RESPONSE_ROOT=norway_energy_crisis/runs/comparison_v2 DQN_OUTPUT=norway_energy_crisis/runs/dqn_v3`.
+```sh
+make pricing-preflight PYTHON=python
+make train-pricing-awake PYTHON=python BUDGET_HOURS=10
+make evaluate-pricing PYTHON=python
+```
+
+Training uses explicit MPS and `caffeinate -d -i -s -m`. The identical command
+resumes a compatible interrupted run. Choose a fresh `PRICING_OUTPUT` after
+changing fingerprinted code. Evaluation requires completed fits and frozen
+selection. Use `make help` for current commands and `make help-legacy` for earlier
+experiments. The [pricing guide](norway_energy_crisis/pricing_v2/README.md) explains
+settings, information boundaries, checkpoints and interpretation.
+
+Raw downloads, prepared arrays, weather, papers and `runs/` stay local and are
+ignored by Git. Consumer checkpoints and prepared data are needed for real-data
+inference/training; cloning the code does not download them. Completed reports,
+metrics and unique checkpoints are retained. Regenerable caches from completed
+older experiments were removed. Historical LCL material remains in the ignored
+`local_archive/lcl/` directory.
+
+GitHub Actions runs formatting, lint and every discovered fixture test using
+Python 3.13 with pandas 2 and pandas 3 on CPU. Optional dashboard tests run in the
+pandas 2 job. Tests create their own data/weather/checkpoints and need no private
+downloads. Full-cohort MPS checks run locally.

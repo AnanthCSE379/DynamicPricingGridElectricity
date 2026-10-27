@@ -15,6 +15,7 @@ from stable_baselines3.common.logger import configure
 
 from norway_energy_crisis.clean_data import ROOT, digest, require, save_json
 from norway_energy_crisis.preprocess import PreparedData
+from norway_energy_crisis.inspection.recorder import EpisodeRecorder
 from .environment import EpisodeProvider, FrozenResponse, PriceEnv, price_grid
 from .evaluation import (
     add_support,
@@ -73,10 +74,17 @@ class SlotClock:
 
 def source_hashes():
     """Fingerprint simulation/training source for strict experiment-resume checks."""
-    return {
+    hashes = {
         name: digest(Path(__file__).with_name(name))
         for name in ("__init__.py", "environment.py", "evaluation.py", "train.py")
     }
+    hashes.update(
+        {
+            f"inspection/{name}": digest(ROOT / "inspection" / name)
+            for name in ("recorder.py", "store.py")
+        }
+    )
+    return hashes
 
 
 def checkpoint_paths(response_root, name):
@@ -249,7 +257,11 @@ def fit(
     if (output / "result.json").is_file():
         resume_path.unlink(missing_ok=True)
         return read_json(output / "result.json")
-    env = PriceEnv(train_provider, engine, cache_folder, cap)
+    env = EpisodeRecorder(
+        PriceEnv(train_provider, engine, cache_folder, cap),
+        output,
+        {"fit": signature, "source_run": str(output.resolve())},
+    )
     val_env = PriceEnv(val_provider, engine, cache_folder, cap)
     if resume_path.is_file():
         model, clock, state = load_resume(resume_path, env, seconds, signature, device)
@@ -266,6 +278,7 @@ def fit(
             validation_time_estimate=0.0,
         )
     model.set_logger(configure(str(output), ["csv"]))
+    env.bind(model, clock)
 
     def validate():
         started = time.monotonic()
@@ -382,6 +395,7 @@ def fit(
         # Flush and release CSV logs on completion or interruption. Resume still
         # uses the last coherent snapshot saved after a full learner update.
         model.logger.close()
+        env.close()
 
 
 def parity(data, engine, provider, response_root):

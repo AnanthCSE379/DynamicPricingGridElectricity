@@ -5,33 +5,26 @@ RAW_DIR ?= $(PACKAGE)
 CLEANED_DIR ?= $(PACKAGE)/cleaned
 WEATHER_CACHE ?= $(PACKAGE)/weather_cache
 DATA_DIR ?= $(PACKAGE)/prepared
-
-# New fits use separate folders; existing checkpoints remain available for evaluation.
-RESPONSE_OUTPUT ?= $(PACKAGE)/runs/comparison_v2
 RESPONSE_ROOT ?= $(PACKAGE)/runs/comparison_v1
-DQN_OUTPUT ?= $(PACKAGE)/runs/dqn_v2
-EVALUATION_RUN ?= $(PACKAGE)/runs/dqn_v1
-RESPONSE_CHECKPOINT ?= $(RESPONSE_ROOT)/transformer_24h_seed42_price/best.pt
-CHECKPOINT ?= $(EVALUATION_RUN)/cap2_seed2026/best.zip
-DEVICE ?= mps
+REFINEMENT_OUTPUT ?= $(PACKAGE)/runs/response_refinement_v2
+RESPONSE_SLOT_SECONDS ?= 3000
+PRICING_OUTPUT ?= $(PACKAGE)/runs/pricing_checkpoint_v1
 BUDGET_HOURS ?= 10
-SPLIT ?= validation
-ENGINE ?= ensemble
+DASHBOARD_PORT ?= 8501
 
 .DEFAULT_GOAL := help
-.PHONY: help install install-dev lint format format-check test check clean-data \
-	preprocess prepare check-response check-mps train-response train-response-awake \
-	train-dqn train-dqn-awake evaluate-response evaluate-dqn
+.PHONY: help install install-dev install-dashboard format format-check lint test \
+	check clean-data preprocess prepare response-v2-preflight train-response-v2 \
+	train-response-v2-awake evaluate-response-v2 pricing-preflight pricing-setup \
+	train-pricing train-pricing-awake evaluate-pricing dashboard help-legacy \
+	pricing-status
 
-help: ## List commands and common overrides.
-	@awk 'BEGIN {FS = ":.*## "; print "Usage: make <target> [NAME=value]\n"} /^[a-zA-Z_-]+:.*## / {printf "  %-23s %s\n", $$1, $$2}' Makefile
-	@printf '%s\n' '' \
-		'Examples:' \
-		'  make install-dev PYTHON=python3' \
-		'  make check' \
-		'  make train-dqn-awake BUDGET_HOURS=10 DEVICE=mps' \
-		'  make evaluate-dqn SPLIT=test ENGINE=reserved' \
-		'Override DATA_DIR, RESPONSE_ROOT, RESPONSE_OUTPUT, DQN_OUTPUT or CHECKPOINT as needed.'
+help: ## List the main data, consumer, pricing and dashboard commands.
+	@awk 'BEGIN {FS = ":.*## "; print "Usage: make <target> [NAME=value]\n"} /^[a-zA-Z0-9_-]+:.*## / {printf "  %-25s %s\n", $$1, $$2}' Makefile
+	@printf '%s\n' '' 'Use PYTHON=python to select your environment.' \
+		'PRICING_OUTPUT and REFINEMENT_OUTPUT select experiment folders.' \
+		'Use a fresh output after changing fingerprinted training code.' \
+		'Run make help-legacy for earlier experiments and diagnostics.'
 
 install: ## Install runtime dependencies into the selected Python environment.
 	"$(PYTHON)" -m pip install -r requirements.txt
@@ -39,8 +32,8 @@ install: ## Install runtime dependencies into the selected Python environment.
 install-dev: ## Install runtime dependencies and pinned formatting/lint tools.
 	"$(PYTHON)" -m pip install -r requirements-dev.txt
 
-lint: ## Check Python errors and style without changing files.
-	"$(PYTHON)" -m ruff check $(PACKAGE) --select E,F
+install-dashboard: ## Install the optional Streamlit viewer dependencies.
+	"$(PYTHON)" -m pip install -r requirements-dashboard.txt
 
 format: ## Format active Python source and tests.
 	"$(PYTHON)" -m black $(PACKAGE)
@@ -48,8 +41,11 @@ format: ## Format active Python source and tests.
 format-check: ## Verify formatting without changing files.
 	"$(PYTHON)" -m black --check $(PACKAGE)
 
-test: ## Run self-contained tests; MPS coverage runs when available.
-	"$(PYTHON)" -m unittest $(PACKAGE).test_pipeline $(PACKAGE).dqn.test_dqn -v
+lint: ## Check Python errors and style without changing files.
+	"$(PYTHON)" -m ruff check $(PACKAGE) --select E,F
+
+test: ## Discover all fixture tests; GPU/UI checks run when available.
+	"$(PYTHON)" -m unittest discover -s $(PACKAGE) -t . -p 'test_*.py' -v
 
 check: format-check lint test ## Run the same code checks used by GitHub Actions.
 
@@ -64,32 +60,63 @@ prepare: ## Run initial cleaning then preprocessing; existing outputs are protec
 	$(MAKE) clean-data
 	$(MAKE) preprocess
 
-check-response: ## Check prepared data and all four response architectures locally.
-	"$(PYTHON)" -m $(PACKAGE).train_response --data "$(DATA_DIR)" --check-only
+response-v2-preflight: ## Verify full-cohort MPS forecasts, gradients and saved-model parity.
+	PYTORCH_ENABLE_MPS_FALLBACK=0 "$(PYTHON)" -u -m $(PACKAGE).response_v2.train --cleaned "$(CLEANED_DIR)" \
+		--data "$(DATA_DIR)" --output "$(REFINEMENT_OUTPUT)" \
+		--incumbent "$(RESPONSE_ROOT)" --device mps --stage audit \
+		--budget-hours "$(BUDGET_HOURS)" --slot-seconds "$(RESPONSE_SLOT_SECONDS)"
 
-check-mps: ## Check full-household MPS parity and DQN updates using local checkpoints.
-	"$(PYTHON)" -m $(PACKAGE).dqn.train --data "$(DATA_DIR)" \
-		--response-root "$(RESPONSE_ROOT)" --output "$(DQN_OUTPUT)" --check-only --device mps
+train-response-v2: ## Train/resume the eight-fit consumer comparison and final diagnostics.
+	PYTORCH_ENABLE_MPS_FALLBACK=0 "$(PYTHON)" -u -m $(PACKAGE).response_v2.train --cleaned "$(CLEANED_DIR)" \
+		--data "$(DATA_DIR)" --output "$(REFINEMENT_OUTPUT)" \
+		--incumbent "$(RESPONSE_ROOT)" --device mps --stage all \
+		--budget-hours "$(BUDGET_HOURS)" --slot-seconds "$(RESPONSE_SLOT_SECONDS)"
 
-train-response: ## Train/resume the response comparison using local prepared data.
-	"$(PYTHON)" -u -m $(PACKAGE).train_response --data "$(DATA_DIR)" --output "$(RESPONSE_OUTPUT)"
+train-response-v2-awake: ## Run consumer refinement with display and sleep prevention.
+	caffeinate -d -i -s -m $(MAKE) train-response-v2
 
-train-response-awake: ## Train response models with macOS display/sleep prevention.
-	caffeinate -d -i -s -m $(MAKE) train-response
+evaluate-response-v2: ## Evaluate the frozen consumer selection and write its report.
+	PYTORCH_ENABLE_MPS_FALLBACK=0 "$(PYTHON)" -u -m $(PACKAGE).response_v2.train --cleaned "$(CLEANED_DIR)" \
+		--data "$(DATA_DIR)" --output "$(REFINEMENT_OUTPUT)" \
+		--incumbent "$(RESPONSE_ROOT)" --device mps --stage evaluate \
+		--budget-hours "$(BUDGET_HOURS)" --slot-seconds "$(RESPONSE_SLOT_SECONDS)"
 
-train-dqn: ## Train/resume all six DQN fits with the configured compute budget.
-	"$(PYTHON)" -u -m $(PACKAGE).dqn.train --data "$(DATA_DIR)" \
-		--response-root "$(RESPONSE_ROOT)" --output "$(DQN_OUTPUT)" \
-		--budget-hours "$(BUDGET_HOURS)" --device "$(DEVICE)"
+pricing-preflight: ## Verify full-cohort MPS inference, updates and recovery.
+	PYTORCH_ENABLE_MPS_FALLBACK=0 "$(PYTHON)" -u -m $(PACKAGE).pricing_v2.train \
+		--stage preflight --device mps --budget-hours "$(BUDGET_HOURS)" \
+		--output "$(PRICING_OUTPUT)"
 
-train-dqn-awake: ## Train DQN with macOS display/sleep prevention.
-	caffeinate -d -i -s -m $(MAKE) train-dqn
+pricing-setup: ## Audit rewards and prepare references/baselines before timed fits.
+	PYTORCH_ENABLE_MPS_FALLBACK=0 "$(PYTHON)" -u -m $(PACKAGE).pricing_v2.train \
+		--stage setup --device mps --budget-hours "$(BUDGET_HOURS)" \
+		--output "$(PRICING_OUTPUT)"
 
-evaluate-response: ## Score RESPONSE_CHECKPOINT on the chosen chronological split.
-	"$(PYTHON)" -m $(PACKAGE).train_response --data "$(DATA_DIR)" \
-		--evaluate "$(RESPONSE_CHECKPOINT)" --split "$(SPLIT)"
+train-pricing: ## Run/resume the six-fit matched pricing comparison and final report.
+	PYTORCH_ENABLE_MPS_FALLBACK=0 "$(PYTHON)" -u -m $(PACKAGE).pricing_v2.train \
+		--device mps --budget-hours "$(BUDGET_HOURS)" --output "$(PRICING_OUTPUT)"
 
-evaluate-dqn: ## Score CHECKPOINT using EVALUATION_RUN's frozen selection and outputs.
-	"$(PYTHON)" -m $(PACKAGE).dqn.train --data "$(DATA_DIR)" \
-		--response-root "$(RESPONSE_ROOT)" --output "$(EVALUATION_RUN)" \
-		--evaluate "$(CHECKPOINT)" --split "$(SPLIT)" --engine "$(ENGINE)" --device "$(DEVICE)"
+train-pricing-awake: ## Keep display and Mac awake throughout setup, fits and evaluation.
+	caffeinate -d -i -s -m $(MAKE) train-pricing
+
+evaluate-pricing: ## Evaluate already-frozen pricing policies without training new fits.
+	PYTORCH_ENABLE_MPS_FALLBACK=0 "$(PYTHON)" -u -m $(PACKAGE).pricing_v2.train \
+		--stage evaluate --device mps --budget-hours "$(BUDGET_HOURS)" \
+		--output "$(PRICING_OUTPUT)"
+
+dashboard: ## Open the local training and household episode inspector.
+	"$(PYTHON)" -m streamlit run $(PACKAGE)/inspection/app.py \
+		--server.address 127.0.0.1 --server.port $(DASHBOARD_PORT) \
+		--browser.gatherUsageStats false
+
+pricing-status: ## Read the current pricing stage without starting a process.
+	@if test -f "$(PRICING_OUTPUT)/status.json"; then \
+		"$(PYTHON)" -m json.tool "$(PRICING_OUTPUT)/status.json"; \
+	else \
+		printf '%s\n' 'No pricing run at this path.'; \
+	fi
+
+help-legacy: ## List earlier experiment and diagnostic commands.
+	@awk 'BEGIN {FS = ":.*## "} /^[a-zA-Z0-9_-]+:.*## / {printf "  %-25s %s\n", $$1, $$2}' make/legacy.mk
+
+# Retain earlier commands without crowding the main workflow.
+include make/legacy.mk

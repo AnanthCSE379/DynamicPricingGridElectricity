@@ -16,7 +16,7 @@ jobs:
   check:
     name: CPU checks (${{ matrix.pandas }})
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
@@ -25,6 +25,9 @@ jobs:
       MPLBACKEND: Agg
       OMP_NUM_THREADS: "4"
       MKL_NUM_THREADS: "4"
+      PYTHONUNBUFFERED: "1"
+      PYTHONDONTWRITEBYTECODE: "1"
+      PYTHONHASHSEED: "0"
     steps:
       - name: Check out source
         uses: actions/checkout@v7
@@ -39,6 +42,7 @@ jobs:
           cache-dependency-path: |
             requirements.txt
             requirements-dev.txt
+            requirements-dashboard.txt
 
       - name: Install CPU dependencies
         run: |
@@ -47,9 +51,24 @@ jobs:
           make install-dev PYTHON=python
           python -m pip install '${{ matrix.pandas }}'
 
+      # Streamlit 1.51 supports pandas 2. Keep it optional so its dependency
+      # constraints cannot downgrade the separate pandas 3 pipeline checks.
+      - name: Install optional dashboard dependencies
+        if: matrix.pandas == 'pandas>=2.2,<3'
+        run: python -m pip install -r requirements-dashboard.txt
+
+      - name: Verify dependency consistency
+        run: python -m pip check
+
+      - name: Verify Makefile entry points
+        run: |
+          make help
+          make help-legacy
+          make pricing-status PYTHON=python PRICING_OUTPUT="${{ runner.temp }}/no-local-data"
+
       # Tests generate their own data, weather and checkpoints. No private files
       # or long-running research training are needed on the hosted CPU runner.
-      - name: Run checks
+      - name: Check formatting, lint and all discovered tests
         env:
           MPLCONFIGDIR: ${{ runner.temp }}/matplotlib
         run: make check PYTHON=python

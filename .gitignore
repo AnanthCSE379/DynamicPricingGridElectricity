@@ -1,5 +1,9 @@
 # Python cache and runtime
 __pycache__/
+.ruff_cache/
+.pytest_cache/
+.coverage
+htmlcov/
 *.py[cod]
 *$py.class
 *.so
@@ -64,3 +68,4 @@ scratch/
 
 # Downloaded reference papers
 /norway_energy_crisis/*.pdf
+/Papers/*.pdf
